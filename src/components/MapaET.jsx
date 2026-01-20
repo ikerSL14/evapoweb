@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Tooltip, /*useMap */ } from 'react-leaflet'
 
 // Componente para animar el vuelo al punto seleccionado
-function FlyToPoint({ center }) {
+/* function FlyToPoint({ center }) {
   const map = useMap()
   React.useEffect(() => {
     if (center) {
@@ -10,7 +10,7 @@ function FlyToPoint({ center }) {
     }
   }, [center, map])
   return null
-}
+}*/
 
 export default function MapaET({ data, onPointClick, selectedCoords }) {
   // ✅ usar useMemo siempre, sin return temprano
@@ -50,13 +50,13 @@ export default function MapaET({ data, onPointClick, selectedCoords }) {
 
   return (
     <div className="w-full h-[600px] rounded-2xl shadow overflow-hidden">
-      <MapContainer center={centro} zoom={7} style={{ height: '100%', width: '100%' }}>
+      <MapContainer center={centro} zoom={7} style={{ height: '38%', width: '100%' }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <FlyToPoint center={selectedCoords ? [selectedCoords.LAT, selectedCoords.LON] : null} />
+        {/*<FlyToPoint center={selectedCoords ? [selectedCoords.LAT, selectedCoords.LON] : null} />*/}
 
         {puntos.map((p, i) => {
           const repET = getRepresentativeET(p.items)

@@ -12,3 +12,30 @@ body {
 .leaflet-container {
   border-radius: 12px;
 }
+
+/* Scrollbar minimal */
+.scroll-minimal::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scroll-minimal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-minimal::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 999px;
+}
+
+.scroll-minimal::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+
+.recharts-tooltip-label {
+  color: #1e293b; /* text-slate-800 */
+  font-weight: bold;
+}
+
+.recharts-tooltip-item-list{
+  font-weight:bold;
+}

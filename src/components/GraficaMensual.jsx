@@ -1,24 +1,51 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-
+import { LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function GraficaMensual({ series }) {
-// `series` es un array con objetos { label: '2023-JAN', ET: 4.2, YEAR, Month }
-if (!series || series.length === 0) return (
-<div className="p-4 text-sm text-gray-400">Selecciona un punto para ver la serie temporal.</div>
-)
+  if (!series || series.length === 0)
+    return (
+      <div className="p-4 text-sm text-gray-400">
+        Selecciona un punto para ver la serie temporal.
+      </div>
+    );
 
+  // 👉 1 punto ≈ 20px (ajustable)
+  const chartWidth = Math.max(series.length * 20, 800);
 
-return (
-<div className="w-full h-64 p-4 bg-slate-800/60 rounded-2xl shadow">
-<h3 className="text-lg font-semibold mb-2">Serie de Evapotranspiración</h3>
-<ResponsiveContainer width="100%" height="85%">
-<LineChart data={series} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-<XAxis dataKey="label" tick={{ fontSize: 11 }} />
-<YAxis />
-<Tooltip formatter={(value) => value ? `${value.toFixed(2)} mm/día` : 'N/A'} />
-<Line type="monotone" dataKey="ET" stroke="#60a5fa" dot={{ r: 3 }} />
-</LineChart>
-</ResponsiveContainer>
-</div>
-)
+  return (
+    <div className="w-full h-full p-4 bg-slate-800/60 rounded-2xl shadow">
+      <h3 className="text-lg font-semibold mb-2">
+        Serie de Evapotranspiración
+      </h3>
+
+      {/* CONTENEDOR SCROLLEABLE */}
+      <div className="w-full h-[85%] overflow-x-auto overflow-y-hidden scroll-minimal">
+        <LineChart
+          width={chartWidth}
+          height={210}
+          data={series}
+          margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+        >
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 10 }}
+            interval={11} // 👈 muestra solo un label por año
+          />
+          <YAxis />
+          <Tooltip
+            formatter={(value) =>
+              value ? `${value.toFixed(2)} mm/día` : "N/A"
+            }
+          />
+          <Line
+            type="monotone"
+            dataKey="ET"
+            stroke="#60a5fa"
+            strokeWidth={2}
+            dot={false}          // 🔥 CLAVE para performance
+            isAnimationActive={false} // 🔥 MUY IMPORTANTE
+          />
+        </LineChart>
+      </div>
+    </div>
+  );
 }
