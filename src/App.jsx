@@ -1,3 +1,4 @@
+'use client';
 import React, { useMemo, useState } from "react";
 import useETdata from "./hooks/useETdata";
 import MapaET from "./components/MapaET";
@@ -107,8 +108,24 @@ export default function App() {
       </div>
 
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Panel de datos - orden 2 en móvil, primera columna en desktop */}
+        <div className="order-2 lg:order-1 col-span-1 lg:col-span-5 lg:row-span-2 bg-slate-800/60 rounded-2xl shadow">
+          {selectedPoint ? (
+            <PanelDatos
+              selectedPoint={selectedPoint}
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
+              onChangeDate={handleChangeDate}
+            />
+          ) : (
+            <div className="p-4">
+              Selecciona un punto en el mapa para ver datos y series.
+            </div>
+          )}
+        </div>
+
         {/* Mapa - orden 1 en móvil, fila 1 derecha en desktop */}
-        <div className="order-1 lg:order-none col-span-1 lg:col-span-7 bg-slate-800/60 rounded-2xl shadow h-[200px]">
+        <div className="order-1 lg:order-2 col-span-1 lg:col-span-7 bg-slate-800/60 rounded-2xl shadow h-[200px]">
           {loading ? (
             <div className="p-4">Cargando datos...</div>
           ) : (
@@ -124,24 +141,8 @@ export default function App() {
           )}
         </div>
 
-        {/* Panel de datos - orden 2 en móvil, ocupa 2 filas en desktop */}
-        <div className="order-2 lg:order-none col-span-1 lg:col-span-5 lg:row-span-2 lg:-order-1 bg-slate-800/60 rounded-2xl shadow">
-          {selectedPoint ? (
-            <PanelDatos
-              selectedPoint={selectedPoint}
-              selectedYear={selectedYear}
-              selectedMonth={selectedMonth}
-              onChangeDate={handleChangeDate}
-            />
-          ) : (
-            <div className="p-4">
-              Selecciona un punto en el mapa para ver datos y series.
-            </div>
-          )}
-        </div>
-
         {/* Gráfica - orden 3 en móvil, fila 2 derecha en desktop */}
-        <div className="order-3 lg:order-none col-span-1 lg:col-span-7 bg-slate-800/60 rounded-2xl shadow h-[240px]">
+        <div className="order-3 lg:order-3 col-span-1 lg:col-span-7 bg-slate-800/60 rounded-2xl shadow h-[240px]">
           <GraficaMensual series={seriesForPlot} />
         </div>
       </div>
