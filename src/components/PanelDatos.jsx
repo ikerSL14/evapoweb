@@ -68,7 +68,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
         <div>
           <label className="text-xs text-gray-400">Mes</label>
           <select
-            className="block mt-1 w-full p-2 rounded bg-slate-900 border border-slate-700 text-gray-200"
+            className="block mt-1 w-full p-2 rounded bg-slate-900 border border-slate-700 text-gray-200 mb-4"
             value={selectedMonth}
             onChange={(e) =>
               onChangeDate(selectedYear, Number(e.target.value))
@@ -84,7 +84,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
       </div>
 
       {/* DATOS */}
-      <div className="grid grid-cols-2 gap-2 text-sm">
+      <div className="grid grid-cols-2 gap-4 text-sm">
         <Dato
           icon={ThermometerSun}
           label="Temperatura Máxima a 2M"
@@ -102,7 +102,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
         <Dato
           icon={Sun}
           label="Radiación solar estimada"
-          valor={selectedPoint.RAD_ESTIMADA}
+          valor={Number(selectedPoint.RAD_ESTIMADA).toFixed(8)}
           unidad="MJ/m²/día"
         />
 
@@ -127,7 +127,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
           unidad="kPa"
         />
 
-        <div className="col-span-2 bg-slate-900/60 p-3 rounded flex gap-3 items-center">
+        <div className="col-span-2 bg-slate-900/60 p-3 rounded flex gap-3 items-center mb-7">
           <Activity className="w-6 h-6 text-emerald-400" />
           <div>
             <div className="text-gray-400 text-sm">
