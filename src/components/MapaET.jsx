@@ -1,5 +1,10 @@
 import React, { useMemo } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Tooltip, /*useMap */ } from 'react-leaflet'
+import { useEffect } from "react";
+import L from "leaflet";
+import "leaflet.heat";
+import { useMap } from "react-leaflet";
+
 
 // Componente para animar el vuelo al punto seleccionado
 /* function FlyToPoint({ center }) {
@@ -11,6 +16,31 @@ import { MapContainer, TileLayer, CircleMarker, Tooltip, /*useMap */ } from 'rea
   }, [center, map])
   return null
 }*/
+function HeatLayer({ puntos }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!puntos.length) return;
+
+    const heatData = puntos.map(p => [
+      p.LAT,
+      p.LON,
+      p.items[0]?.ET_CALCULADA || 0
+    ]);
+
+    const heat = L.heatLayer(heatData, {
+      radius: 25,
+      blur: 15,
+      maxZoom: 10
+    }).addTo(map);
+
+    return () => {
+      map.removeLayer(heat);
+    };
+  }, [puntos, map]);
+
+  return null;
+}
 
 export default function MapaET({ data, onPointClick, selectedCoords }) {
   // ✅ usar useMemo siempre, sin return temprano
@@ -50,11 +80,13 @@ export default function MapaET({ data, onPointClick, selectedCoords }) {
 
   return (
     <div className="w-full h-full rounded-2xl shadow overflow-hidden">
-      <MapContainer center={centro} zoom={7} style={{ height: '100%', width: '100%' }}>
+      <MapContainer center={centro} zoom={9} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        <HeatLayer puntos={puntos} />
 
         {/*<FlyToPoint center={selectedCoords ? [selectedCoords.LAT, selectedCoords.LON] : null} />*/}
 
@@ -65,7 +97,8 @@ export default function MapaET({ data, onPointClick, selectedCoords }) {
               key={i}
               center={[p.LAT, p.LON]}
               radius={8}
-              pathOptions={{ color: getColor(repET), fillOpacity: 0.8 }}
+              opacity={0}
+              fillOpacity={0}
               eventHandlers={{ click: () => onPointClick(p) }}
             >
               <Tooltip direction="top" offset={[0, -8]} opacity={0.9}>

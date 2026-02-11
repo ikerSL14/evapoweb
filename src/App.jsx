@@ -107,9 +107,9 @@ export default function App() {
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Panel de datos - orden 2 en móvil, primera columna en desktop */}
-        <div className="order-2 lg:order-1 col-span-1 lg:col-span-5 lg:row-span-2 bg-slate-800/60 rounded-2xl shadow">
+        <div className="bg-slate-800/60 rounded-2xl shadow order-2 lg:order-1">
           {selectedPoint ? (
             <PanelDatos
               selectedPoint={selectedPoint}
@@ -125,7 +125,7 @@ export default function App() {
         </div>
 
         {/* Mapa - orden 1 en móvil, fila 1 derecha en desktop */}
-        <div className="order-1 lg:order-2 col-span-1 lg:col-span-7 bg-slate-800/60 rounded-2xl shadow h-[200px]">
+        <div className="bg-slate-800/60 rounded-2xl shadow h-[463px] order-1 lg:order-2">
           {loading ? (
             <div className="p-4">Cargando datos...</div>
           ) : (
@@ -142,7 +142,7 @@ export default function App() {
         </div>
 
         {/* Gráfica - orden 3 en móvil, fila 2 derecha en desktop */}
-        <div className="order-3 lg:order-3 col-span-1 lg:col-span-7 bg-slate-800/60 rounded-2xl shadow h-[240px]">
+        <div className="lg:col-span-2 bg-slate-800/60 rounded-2xl shadow h-[260px] order-3">
           <GraficaMensual series={seriesForPlot} />
         </div>
       </div>
