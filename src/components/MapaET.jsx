@@ -72,11 +72,6 @@ export default function MapaET({ data, onPointClick, selectedCoords }) {
     return et ?? 0
   }
 
-  const getColor = (et) => {
-    if (et < 4) return '#2563eb'
-    if (et < 6) return '#f59e0b'
-    return '#ef4444'
-  }
 
   return (
     <div className="w-full h-full rounded-2xl shadow overflow-hidden">
