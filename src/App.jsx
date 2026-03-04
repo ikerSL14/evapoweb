@@ -6,7 +6,7 @@ import MapaET from "./components/MapaET";
 import GraficaMensual from "./components/GraficaMensual";
 import PanelDatos from "./components/PanelDatos";
 // Añadimos iconos para el chat
-import { CloudRain, MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { CloudRain, MessageCircle, X, Send, Bot } from "lucide-react";
 
 const SUPABASE_URL = 'https://odufpumbiggqvkqbnghn.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kdWZwdW1iaWdncXZrcWJuZ2huIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzI4NDMsImV4cCI6MjA4ODA0ODg0M30.xWQKpkSv-Oqripz53XnUcQavNWb7fHeQVSfTnOUZ3xg'; // <--- Aquí te sugiero usar la ANON KEY para el frontend por seguridad
