@@ -61,6 +61,8 @@ const handleSendMessage = async () => {
       match_count: 200
     });
 
+    if (dbError) throw dbError;
+
     const contextoTexto = contexto?.map(c => `- ${c.descripcion}`).join('\n');
 
     // LLAMADA FINAL A LA WORKER (Ahora con el contexto para la respuesta final)
