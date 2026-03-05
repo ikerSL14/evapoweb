@@ -39,3 +39,49 @@ body {
 .recharts-tooltip-item-list{
   font-weight:bold;
 }
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 0.8rem;
+}
+.markdown-content th, .markdown-content td {
+  border: 1px solid #475569;
+  padding: 4px 8px;
+  text-align: left;
+}
+.markdown-content th {
+  background-color: #1e293b;
+}
+@layer components {
+  .markdown-content table {
+    @apply w-full my-4 border-collapse bg-slate-800/50 rounded-lg overflow-hidden;
+  }
+  .markdown-content th {
+    @apply bg-blue-600 text-white p-2 text-left border border-slate-600 font-bold;
+  }
+  .markdown-content td {
+    @apply p-2 border border-slate-700 text-gray-300;
+  }
+  .markdown-content tr:nth-child(even) {
+    @apply bg-slate-700/30;
+  }
+  /* Contenedor para que la tabla no rompa el chat */
+.markdown-content {
+  @apply overflow-x-auto w-full scroll-minimal;
+}
+
+.markdown-content table {
+  @apply min-w-[500px] mb-4 border-collapse bg-slate-800/50 rounded-lg;
+  /* El min-w asegura que no se apriete demasiado el texto */
+}
+
+.markdown-content th {
+  @apply bg-blue-600 text-white p-2 text-xs border border-slate-600;
+}
+
+.markdown-content td {
+  @apply p-2 border border-slate-700 text-[11px] text-gray-300;
+}
+}

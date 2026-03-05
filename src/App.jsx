@@ -5,17 +5,20 @@ import useETdata from "./hooks/useETdata";
 import MapaET from "./components/MapaET";
 import GraficaMensual from "./components/GraficaMensual";
 import PanelDatos from "./components/PanelDatos";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import './index.css';
 // Añadimos iconos para el chat
 import { CloudRain, MessageCircle, X, Send, Bot } from "lucide-react";
 
-const SUPABASE_URL = 'https://odufpumbiggqvkqbnghn.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kdWZwdW1iaWdncXZrcWJuZ2huIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzI4NDMsImV4cCI6MjA4ODA0ODg0M30.xWQKpkSv-Oqripz53XnUcQavNWb7fHeQVSfTnOUZ3xg'; // <--- Aquí te sugiero usar la ANON KEY para el frontend por seguridad
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const GEMINI_API_KEY = 'AIzaSyBwOFtd-8sOu-NPfAw7Fbn39iKxhzfY6So'; // <--- Tu API Key de Gemini
 
 export default function App() {
+  const [isSearching, setIsSearching] = useState(false);
   const { data, loading } = useETdata();
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
@@ -36,89 +39,44 @@ export default function App() {
   // Agrega esto al inicio de tu handleSendMessage
 const handleSendMessage = async () => {
   if (!input.trim()) return;
+  setIsSearching(true);
   
   const userMsg = { role: 'user', content: input };
   setMessages(prev => [...prev, userMsg]);
   setInput('');
 
   try {
-    console.log("1. Iniciando Embedding para:", input);
-    
-    // URL corregida para v1beta (a veces v1 da problemas de CORS en React)
-    const urlEmbed = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_API_KEY}`;
-    
-    const resEmbed = await fetch(urlEmbed, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: { parts: [{ text: input }] },
-        outputDimensionality: 768 
-      })
+    // LLAMADA ÚNICA A LA WORKER (Ella vectoriza y prepara el chat)
+    const resWorker = await fetch("https://shrill-shape-31e8.ikersalazarliev.workers.dev", {
+      method: "POST",
+      body: JSON.stringify({ prompt: input, contextoTexto: "" }) // Primero pedimos embedding
     });
     
-    const embedData = await resEmbed.json();
-    if (embedData.error) {
-      console.error("❌ Error en Gemini Embedding:", embedData.error);
-      throw new Error(embedData.error.message);
-    }
-    
-    const embedding = embedData.embedding.values;
-    console.log("2. Embedding obtenido correctamente (768 dimensiones)");
+    const { embedding } = await resWorker.json();
 
-    // --- PASO 2: BUSCAR EN SUPABASE ---
-    console.log("3. Consultando RPC en Supabase...");
-    const { data: contexto, error: dbError } = await supabase.rpc('buscar_evapo', {
+    // PASO 2: Supabase (Esto sí puede seguir en el frontend porque la Anon Key es pública)
+    const { data: contexto, error: dbError } = await supabase.rpc('buscar_evapo_openai', {
       query_embedding: embedding,
-      match_threshold: 0.2, // Lo bajamos más para probar
-      match_count: 5
+      match_threshold: 0.3,
+      match_count: 200
     });
 
-    if (dbError) {
-      console.error("❌ Error en RPC Supabase:", dbError);
-      throw dbError;
-    }
-    
-    console.log("4. Contexto recibido de DB:", contexto);
+    const contextoTexto = contexto?.map(c => `- ${c.descripcion}`).join('\n');
 
-    const contextoTexto = contexto && contexto.length > 0 
-      ? contexto.map(c => c.descripcion).join('\n---\n')
-      : "No hay datos específicos.";
-
-    // --- PASO 3: GENERAR RESPUESTA CON EL MODELO CORRECTO (2.5) ---
-    console.log("5. Pidiendo respuesta a Gemini 2.5 Flash...");
-
-    // Esta es la URL exacta según tu lista de modelos
-    const urlChat = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-    const resChat = await fetch(urlChat, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `Eres un asistente experto en agrometeorología para Cárdenas, Tabasco. 
-            CONTEXTO HISTÓRICO:
-            ${contextoTexto}
-            
-            PREGUNTA DEL USUARIO: ${input}`
-          }]
-        }]
-      })
+    // LLAMADA FINAL A LA WORKER (Ahora con el contexto para la respuesta final)
+    const resFinal = await fetch("https://shrill-shape-31e8.ikersalazarliev.workers.dev", {
+      method: "POST",
+      body: JSON.stringify({ prompt: input, contextoTexto })
     });
 
-    const chatData = await resChat.json();
-    
-    // Si 'gemini-pro' tampoco te aparece, el error nos dirá el nombre exacto 
-    // que Google quiere que uses (míralo en la consola).
-    if (chatData.error) throw new Error(chatData.error.message);
-    
-    const botRes = chatData.candidates[0].content.parts[0].text;
-    setMessages(prev => [...prev, { role: 'bot', content: botRes }]);
-    console.log("✅ Proceso completado.");
+    const { respuesta } = await resFinal.json();
 
+    setMessages(prev => [...prev, { role: 'bot', content: respuesta }]);
   } catch (err) {
-    console.error("🔴 Error detallado:", err);
-    setMessages(prev => [...prev, { role: 'bot', content: `Error: ${err.message || 'Error de conexión'}` }]);
+    console.error(err);
+    setMessages(prev => [...prev, { role: 'bot', content: "Error de conexión segura." }]);
+  } finally {
+    setIsSearching(false);
   }
 };
   // ----------------------------
@@ -202,11 +160,26 @@ const handleSendMessage = async () => {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`p-3 rounded-xl text-sm max-w-[85%] ${m.role === 'user' ? 'bg-blue-500' : 'bg-slate-700'}`}>
-                    {m.content}
+                  <div className={`p-3 rounded-xl text-sm max-w-[85%] overflow-hidden ${m.role === 'user' ? 'bg-blue-500' : 'bg-slate-700'}`}>
+                    {/* Removemos el className de ReactMarkdown y lo ponemos en un div que lo envuelva */}
+                    <div className="markdown-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {m.content}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 </div>
               ))}
+
+              {/* PASO C: Indicador de búsqueda */}
+                {isSearching && (
+                  <div className="flex justify-start animate-pulse">
+                    <div className="bg-slate-700/50 p-3 rounded-xl text-xs text-blue-300 flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                      Buscando en la base de datos de Tabasco...
+                    </div>
+                  </div>
+                )}
               <div ref={scrollRef} />
             </div>
             <div className="p-3 border-t border-slate-700 bg-slate-800 flex gap-2">
