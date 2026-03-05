@@ -11,10 +11,17 @@ import './index.css';
 // Añadimos iconos para el chat
 import { CloudRain, MessageCircle, X, Send, Bot } from "lucide-react";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Creamos el cliente con opciones globales para asegurar que la apikey viaje siempre
+const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY) 
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: {
+        headers: { 'apikey': SUPABASE_ANON_KEY },
+      },
+    }) 
+  : null;
 
 
 export default function App() {
@@ -55,10 +62,15 @@ const handleSendMessage = async () => {
     const { embedding } = await resWorker.json();
 
     // PASO 2: Supabase (Esto sí puede seguir en el frontend porque la Anon Key es pública)
+    if (!supabase) {
+        console.error("El cliente de Supabase no se inicializó.");
+        throw new Error("Error de configuración de servidor");
+    }
+
     const { data: contexto, error: dbError } = await supabase.rpc('buscar_evapo_openai', {
-      query_embedding: embedding,
-      match_threshold: 0.3,
-      match_count: 200
+        query_embedding: embedding,
+        match_threshold: 0.2,
+        match_count: 5
     });
 
     if (dbError) throw dbError;
