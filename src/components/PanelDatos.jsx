@@ -33,7 +33,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
   
   // 🔹 Años únicos disponibles
   const years = useMemo(() => {
-    return [...new Set(series.map(s => s.YEAR))].sort((a, b) => a - b);
+    return [...new Set(series.map(s => s.YEAR))].sort((a, b) => b - a);
   }, [series]);
 
   // 🔹 Meses disponibles para el año seleccionado

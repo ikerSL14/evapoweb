@@ -67,20 +67,104 @@ const handleSendMessage = async () => {
         throw new Error("Error de configuración de servidor");
     }
 
-    const { data: contexto, error: dbError } = await supabase.rpc('buscar_evapo_openai', {
-        query_embedding: embedding,
-        match_threshold: 0.2,
-        match_count: 5
-    });
+    // 1. Detectar TODOS los años escritos en el prompt (la 'g' al final es clave para atrapar múltiples)
+    const matchAños = input.match(/\b(19|20)\d{2}\b/g);
+    // Usamos Set para quitar años duplicados si el usuario escribe "1998 vs 1998"
+    let añosBuscados = matchAños ? [...new Set(matchAños.map(Number))] : []; 
 
-    if (dbError) throw dbError;
+    // 2. LÓGICA PREDICTIVA (El truco para 2026)
+    const esPreguntaFuturo = añosBuscados.includes(2026) || input.toLowerCase().includes("este año");
 
-    const contextoTexto = contexto?.map(c => `- ${c.descripcion}`).join('\n');
+    if (esPreguntaFuturo) {
+        // Si no estaban ya, inyectamos los años de referencia
+        if (!añosBuscados.includes(2025)) añosBuscados.push(2025);
+        if (!añosBuscados.includes(2024)) añosBuscados.push(2024);
+        
+        // Eliminamos el 2026 de la búsqueda en BD porque sabemos que no existe aún
+        añosBuscados = añosBuscados.filter(y => y !== 2026);
+    }
 
-    // LLAMADA FINAL A LA WORKER (Ahora con el contexto para la respuesta final)
+    const textoInput = input.toLowerCase();
+    const esComparacion = textoInput.includes("compar") || textoInput.includes("vs");
+    const pideReciente = textoInput.includes("reciente") || textoInput.includes("actual");
+
+    // 2. Truco Jedi: Si compara 1 año contra "el más reciente", inyectamos 2025 artificialmente
+    if (esComparacion && añosBuscados.length === 1 && pideReciente) {
+        añosBuscados.push(2025); // Forzamos a que busque también en los datos actuales
+    }
+
+    let contextoFinal = [];
+    let intentos = 0;
+    const maxIntentos = 2;
+
+    while (intentos < maxIntentos) {
+        try {
+            if (añosBuscados.length > 0) {
+                // 🚀 BÚSQUEDA PARALELA: Disparamos una consulta a la BD por CADA año
+                const promesas = añosBuscados.map(año => 
+                    supabase.rpc('buscar_evapo_openai', {
+                        query_embedding: embedding,
+                        match_threshold: 0.2,
+                        match_count: 100, // 100 espacios garantizados para CADA AÑO
+                        target_year: año
+                    })
+                );
+                
+                const resultados = await Promise.all(promesas);
+                
+                // Juntamos los datos de todos los años en un solo arreglo
+                for (const res of resultados) {
+                    if (res.error) throw res.error;
+                    if (res.data) contextoFinal.push(...res.data);
+                }
+            } else {
+                // 🌎 Búsqueda General (Cuando pregunta "¿Mejor época?" sin dar años)
+                const { data, error: dbError } = await supabase.rpc('buscar_evapo_openai', {
+                    query_embedding: embedding,
+                    match_threshold: 0.2,
+                    match_count: 200, // Mochila más grande
+                    target_year: null
+                });
+                if (dbError) throw dbError;
+                contextoFinal = data;
+            }
+            break; // Si tiene éxito, salimos del bucle
+        } catch (e) {
+            intentos++;
+            if (intentos >= maxIntentos) throw e;
+            console.warn(`Intento ${intentos} fallido, reintentando...`);
+            await new Promise(res => setTimeout(res, 1000));
+        }
+    }
+
+    // 3. Filtrado ultra-seguro (usamos contextoFinal en lugar de contexto)
+    const contextoTexto = contextoFinal
+        ?.filter(c => {
+            const tieneCero = /\b0\.0+\b/.test(c.descripcion); 
+            return !tieneCero;
+        })
+        .map(c => `- ${c.descripcion}`)
+        .join('\n');
+
+    // 4. Validación de seguridad: ¿Qué pasa si después de filtrar no queda nada?
+    if (!contextoTexto || contextoTexto.trim() === "") {
+        // Si no hay datos reales, le avisamos a la Worker de forma explícita
+        const resFinal = await fetch("https://shrill-shape-31e8.ikersalazarliev.workers.dev", {
+            method: "POST",
+            body: JSON.stringify({ 
+                prompt: input, 
+                contextoTexto: "SISTEMA: No se encontraron registros válidos (mayores a 0) para este periodo en la base de datos." 
+            })
+        });
+        const { respuesta } = await resFinal.json();
+        setMessages(prev => [...prev, { role: 'bot', content: respuesta }]);
+        return; // Salimos de la función
+    }
+
+    // 5. Llamada final normal (si hay contexto válido)
     const resFinal = await fetch("https://shrill-shape-31e8.ikersalazarliev.workers.dev", {
-      method: "POST",
-      body: JSON.stringify({ prompt: input, contextoTexto })
+        method: "POST",
+        body: JSON.stringify({ prompt: input, contextoTexto })
     });
 
     const { respuesta } = await resFinal.json();
@@ -88,7 +172,8 @@ const handleSendMessage = async () => {
     setMessages(prev => [...prev, { role: 'bot', content: respuesta }]);
   } catch (err) {
     console.error(err);
-    setMessages(prev => [...prev, { role: 'bot', content: "Error de conexión segura." }]);
+    const mensajeError = err.message || "Error desconocido";
+    setMessages(prev => [...prev, { role: 'bot', content: `⚠️ Error técnico: ${mensajeError}. Por favor, intenta de nuevo.` }]);
   } finally {
     setIsSearching(false);
   }
@@ -101,11 +186,22 @@ const handleSendMessage = async () => {
       .map(it => ({ ...it, YEAR: Number(it.YEAR), Month: Number(it.Month) }))
       .sort((a, b) => a.YEAR - b.YEAR || a.Month - b.Month);
 
-    let year = selectedYear ?? series[0]?.YEAR;
-    let month = selectedMonth ?? series[0]?.Month;
+    // 2. Buscamos el año más alto para la selección inicial
+    // Usamos Math.max para no depender del orden del array
+    const maxYear = Math.max(...series.map(s => s.YEAR));
+    const seriesDelMaxAño = series.filter(s => s.YEAR === maxYear);
+    const minMonth = Math.min(...seriesDelMaxAño.map(s => s.Month));
+
+    let year = selectedYear ?? maxYear;
+    let month = selectedMonth ?? minMonth;
+    
     let found = series.find(s => s.YEAR === year && s.Month === month);
 
-    if (!found) { found = series[0]; year = found.YEAR; month = found.Month; }
+    if (!found) { 
+      found = seriesDelMaxAño[0] || series[series.length - 1];
+      year = found?.YEAR; 
+      month = found?.Month; 
+    }
 
     setSelectedYear(year);
     setSelectedMonth(month);
