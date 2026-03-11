@@ -36,7 +36,7 @@ export default function App() {
   // --- ESTADOS PARA EL CHAT ---
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'bot', content: '¡Hola! Soy tu asistente de Cárdenas. Pregúntame sobre cuándo sembrar o extraer hule.' }
+    { role: 'bot', content: '¡Hola! Soy tu asistente de HydroFlow Precision. Pregúntame sobre cuándo sembrar o extraer hule.' }
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef(null);
