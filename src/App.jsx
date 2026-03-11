@@ -9,10 +9,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './index.css';
 // Añadimos iconos para el chat
-import { CloudRain, MessageCircle, X, Send, Bot } from "lucide-react";
+import { CloudRain, MessageCircle, X, Send, Bot, Info } from "lucide-react";
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY;
+
 
 // Creamos el cliente con opciones globales para asegurar que la apikey viaje siempre
 const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY) 
@@ -30,6 +31,7 @@ export default function App() {
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   // --- ESTADOS PARA EL CHAT ---
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -232,12 +234,13 @@ const handleSendMessage = async () => {
   }, [selectedPoint]);
 
   return (
-<div className="min-h-screen lg:h-screen bg-slate-950 text-slate-100 flex flex-col lg:overflow-hidden">
+<div className="min-h-screen lg:h-screen flex flex-col lg:overflow-hidden">
 
 {/* NAVBAR */}
-<header className="h-16 border-b border-slate-800 bg-slate-900/70 backdrop-blur sticky top-0 z-50">
-  <div className="max-w-[1800px] mx-auto h-full flex items-center px-6">
+<header className="navbar-glass h-16 sticky top-0 z-50">
+  <div className="max-w-[1800px] mx-auto h-full flex items-center justify-between px-6 relative">
     
+    {/* LOGO */}
     <div className="flex items-center gap-3">
       <div className="p-2 rounded-lg bg-blue-500/10">
         <CloudRain className="w-6 h-6 text-blue-400"/>
@@ -248,8 +251,82 @@ const handleSendMessage = async () => {
       </span>
     </div>
 
+    {/* BOTON INFO */}
+    <button
+      onClick={() => setShowInfo(true)}
+      className="
+      flex items-center gap-2
+      px-3 py-2
+      rounded-lg
+      bg-slate-800/50
+      border border-slate-700
+      text-slate-300
+      hover:bg-blue-600/20
+      hover:text-blue-300
+      transition
+      "
+    >
+      <Info size={18}/>
+      <span className="hidden sm:inline text-sm">Info</span>
+    </button>
+
   </div>
 </header>
+
+{showInfo && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+
+    <div className="
+    relative
+    w-[90%] max-w-md
+    bg-gradient-to-b
+    from-slate-900
+    to-slate-800
+    border border-blue-500/20
+    shadow-2xl
+    rounded-2xl
+    p-6
+    text-center
+    ">
+
+      {/* cerrar */}
+      <button
+        onClick={() => setShowInfo(false)}
+        className="absolute top-3 right-3 text-slate-400 hover:text-white"
+      >
+        <X size={18}/>
+      </button>
+
+      {/* icono */}
+      <div className="flex justify-center mb-3">
+        <div className="p-3 rounded-xl bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+          <CloudRain className="w-7 h-7 text-blue-400"/>
+        </div>
+      </div>
+
+      {/* titulo */}
+      <h2 className="text-xl font-semibold text-blue-300">
+        HydroFlow Precision
+      </h2>
+
+      <p className="text-sm text-slate-400 mb-4">
+        Sistema de visualización de evapotranspiración
+      </p>
+
+      {/* autores */}
+      <div className="space-y-1 text-sm text-slate-200">
+        <p>Iker Ignacio Salazar Liévano</p>
+        <p>Juan Jesús Arreola Jiménez</p>
+      </div>
+
+      {/* asesor */}
+      <div className="mt-4 pt-4 border-t border-slate-700 text-xs text-slate-400">
+        Asesor: Dr. Arturo Corona Ferreira
+      </div>
+
+    </div>
+  </div>
+)}
 
 
 {/* DASHBOARD */}
@@ -271,10 +348,12 @@ overflow-visible lg:overflow-hidden
 
 {/* CHAT PANEL */}
 <div className="
+order-3
+lg:order-3
 hidden
 lg:flex
 flex-col
-bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden
+dashboard-chat-card overflow-hidden
 ">
 
   <div className="p-4 border-b border-slate-800 flex items-center gap-2">
@@ -290,7 +369,7 @@ bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden
       >
         <div
           className={`p-3 rounded-xl text-sm max-w-[85%] break-words ${
-            m.role==="user" ? "bg-blue-600" : "bg-slate-800"
+            m.role==="user" ? "bg-gradient-to-r from-blue-700 to-cyan-600" : "bg-slate-800"
           }`}
         >
           <div className="markdown-content">
@@ -324,7 +403,7 @@ bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden
     />
     <button
       onClick={handleSendMessage}
-      className="bg-blue-600 p-2 rounded-lg hover:bg-blue-500 transition"
+      className="bg-gradient-to-r from-blue-600 to-cyan-500 p-2 rounded-lg hover:bg-blue-500 transition"
     >
       <Send size={16}/>
     </button>
@@ -412,7 +491,7 @@ lg:order-2
 flex flex-col gap-6 min-w-0 min-h-0
 ">
 
-  <div className="h-[55vh] lg:flex-[1.5] lg:h-auto bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+  <div className="h-[55vh] lg:flex-[1.5] lg:h-auto dashboard-card overflow-hidden">
     {loading
       ? <div className="p-6">Cargando mapa...</div>
       : <MapaET
@@ -423,7 +502,7 @@ flex flex-col gap-6 min-w-0 min-h-0
     }
   </div>
 
-  <div className="h-[35vh] lg:flex-[1] lg:h-auto min-w-0 bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+  <div className="h-[30vh] lg:flex-[1] lg:h-auto min-w-0 dashboard-card overflow-hidden">
     <GraficaMensual series={seriesForPlot}/>
   </div>
 
@@ -433,8 +512,8 @@ flex flex-col gap-6 min-w-0 min-h-0
 {/* PANEL DATOS */}
 <div className="
 order-2
-lg:order-3
-bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden
+lg:order-1
+dashboard-card overflow-hidden
 ">
 
 {selectedPoint ? (

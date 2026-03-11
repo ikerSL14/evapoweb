@@ -45,6 +45,15 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
     return MESES.filter(m => mesesDisponibles.includes(m.value));
   }, [series, selectedYear]);
 
+  // Cambio de color icono Evapotranspiración
+
+  const et = Number(selectedPoint?.ET_CALCULADA);
+
+  let etColor = "text-emerald-400";
+
+  if (et >= 4 && et < 6) etColor = "text-yellow-400";
+  if (et >= 6) etColor = "text-red-400";
+
   return (
     <div className="p-5 space-y-5 lg:h-full lg:overflow-y-auto scroll-minimal">
 
@@ -53,7 +62,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
         <div>
           <label className="text-xs text-gray-400">Año</label>
           <select
-            className="block mt-1 w-full p-2 rounded bg-slate-900 border border-slate-700 text-gray-200"
+            className="block mt-1 w-full p-2 rounded bg-slate-950 border border-slate-700 text-gray-200"
             value={selectedYear}
             onChange={(e) =>
               onChangeDate(Number(e.target.value), selectedMonth)
@@ -68,7 +77,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
         <div>
           <label className="text-xs text-gray-400">Mes</label>
           <select
-            className="block mt-1 w-full p-2 rounded bg-slate-900 border border-slate-700 text-gray-200 mb-4"
+            className="block mt-1 w-full p-2 rounded bg-slate-950 border border-slate-700 text-gray-200 mb-4"
             value={selectedMonth}
             onChange={(e) =>
               onChangeDate(selectedYear, Number(e.target.value))
@@ -127,8 +136,8 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
           unidad="kPa"
         />
 
-        <div className="col-span-2 bg-slate-900/60 p-3 rounded flex gap-3 items-center mb-2">
-          <Activity className="w-6 h-6 text-emerald-400" />
+        <div className="col-span-2 bg-slate-950/60 p-3 rounded flex gap-3 items-center mb-2">
+          <Activity className={`w-6 h-6 ${etColor}`} />
           <div>
             <div className="text-gray-400 text-sm">
               Evapotranspiración calculada
@@ -147,7 +156,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
 
 function Dato({ icon: Icon, label, valor, unidad }) {
   return (
-    <div className="bg-slate-900/60 p-3 rounded flex gap-3 items-center min-w-0">
+    <div className="bg-slate-950/60 p-3 rounded flex gap-3 items-center min-w-0">
       {Icon && <Icon className="w-5 h-5 text-blue-400 shrink-0" />}
 
       <div className="min-w-0">

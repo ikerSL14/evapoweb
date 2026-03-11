@@ -6,7 +6,14 @@ html, body, #root {
   height: 100%;
 }
 body {
-  @apply bg-slate-900 text-gray-200;
+  color: #e5e7eb;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(37,99,235,0.25), transparent 40%),
+    radial-gradient(circle at 80% 0%, rgba(59,130,246,0.20), transparent 45%),
+    linear-gradient(135deg, #020617 0%, #020617 40%, #020617 60%, #020617 100%);
+
+  background-attachment: fixed;
 }
 
 
@@ -85,4 +92,89 @@ width:6px;
 .markdown-content td {
   @apply p-2 border border-slate-700 text-[11px] text-gray-300;
 }
+}
+.dashboard-card {
+  background: linear-gradient(
+    160deg,
+    rgba(30,41,59,0.75),
+    rgba(15,23,42,0.65)
+  );
+
+  backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(59,130,246,0.15);
+
+  box-shadow:
+    0 0 0 1px rgba(59,130,246,0.05),
+    0 10px 30px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+
+  border-radius: 16px;
+}
+.dashboard-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 50% 0%, rgba(59,130,246,0.15), transparent 60%);
+  pointer-events:none;
+}
+
+.dashboard-chat-card {
+  background: linear-gradient(
+    160deg,
+    rgba(14, 23, 39, 0.75),
+    rgba(15,23,42,0.65)
+  );
+
+  backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(59,130,246,0.15);
+
+  box-shadow:
+    0 0 0 1px rgba(59,130,246,0.05),
+    0 10px 30px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+
+  border-radius: 16px;
+}
+.dashboard-chat-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 10% 0%, rgba(59,130,246,0.15), transparent 60%);
+  pointer-events:none;
+}
+
+.navbar-glass {
+
+  background: linear-gradient(
+    180deg,
+    rgba(15,23,42,0.85),
+    rgba(2,6,23,0.65)
+  );
+
+  backdrop-filter: blur(14px);
+
+  border-bottom: 1px solid rgba(59,130,246,0.15);
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.45),
+    inset 0 -1px 0 rgba(59,130,246,0.08);
+
+}
+.navbar-glass::before{
+
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background:
+  radial-gradient(
+    circle at 50% -20%,
+    rgba(59,130,246,0.25),
+    transparent 60%
+  );
+
+  pointer-events:none;
+
 }

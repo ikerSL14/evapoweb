@@ -92,7 +92,7 @@ export default function MapaET({ data, onPointClick, selectedCoords }) {
 
 
   return (
-    <div className="relative z-0 w-full h-full rounded-2xl shadow-inner overflow-hidden border border-slate-800">
+    <div className="relative z-0 w-full h-full dashboard-card overflow-hidden">
       <MapContainer
         center={centro}
         zoom={9}
