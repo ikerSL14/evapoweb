@@ -226,93 +226,225 @@ const handleSendMessage = async () => {
   }, [selectedPoint]);
 
   return (
-    <div className="min-h-screen p-6 bg-slate-900 text-slate-100 relative">
-      {/* Tu contenido actual */}
-      <div className="max-w-[1400px] mx-auto mb-6">
-        <div className="p-4 flex flex-col sm:flex-row items-center sm:justify-between gap-2 bg-slate-800/60 rounded-2xl shadow">
-          <h1 className="flex items-center gap-3 text-xl font-bold text-blue-300">
-            <span className="p-2 rounded-lg bg-blue-500/10">
-              <CloudRain className="w-5 h-5 text-blue-400" />
-            </span>
-            Sistema de visualización de Evapotranspiración
-          </h1>
-          <div className="text-sm text-gray-400">Fuente: NASA POWER • CSV local</div>
-        </div>
+<div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+
+{/* NAVBAR */}
+<header className="h-16 border-b border-slate-800 bg-slate-900/70 backdrop-blur sticky top-0 z-50">
+  <div className="max-w-[1800px] mx-auto h-full flex items-center px-6">
+    
+    <div className="flex items-center gap-3">
+      <div className="p-2 rounded-lg bg-blue-500/10">
+        <CloudRain className="w-6 h-6 text-blue-400"/>
       </div>
 
-      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-slate-800/60 rounded-2xl shadow order-2 lg:order-1">
-          {selectedPoint ? (
-            <PanelDatos selectedPoint={selectedPoint} selectedYear={selectedYear} selectedMonth={selectedMonth} onChangeDate={handleChangeDate} />
-          ) : (
-            <div className="p-4 text-gray-400">Selecciona un punto en el mapa.</div>
-          )}
-        </div>
-        <div className="bg-slate-800/60 rounded-2xl shadow h-[463px] order-1 lg:order-2">
-          {loading ? <div className="p-4">Cargando...</div> : <MapaET data={data} onPointClick={handlePointClick} selectedCoords={selectedPoint ? { LAT: selectedPoint.LAT, LON: selectedPoint.LON } : null} />}
-        </div>
-        <div className="lg:col-span-2 bg-slate-800/60 rounded-2xl shadow h-[260px] order-3">
-          <GraficaMensual series={seriesForPlot} />
-        </div>
-      </div>
-
-      {/* --- BOTÓN FLOTANTE Y VENTANA DE CHAT --- */}
-      <div className="fixed bottom-6 right-6 z-[2000]">
-        {isChatOpen && (
-          <div className="absolute bottom-16 right-0 w-[350px] h-[450px] bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4">
-            <div className="p-4 bg-blue-600 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Bot size={20} />
-                <span className="font-bold text-sm">Asistente IA</span>
-              </div>
-              <button onClick={() => setIsChatOpen(false)}><X size={20} /></button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((m, i) => (
-                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`p-3 rounded-xl text-sm max-w-[85%] overflow-hidden ${m.role === 'user' ? 'bg-blue-500' : 'bg-slate-700'}`}>
-                    {/* Removemos el className de ReactMarkdown y lo ponemos en un div que lo envuelva */}
-                    <div className="markdown-content">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {m.content}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {/* PASO C: Indicador de búsqueda */}
-                {isSearching && (
-                  <div className="flex justify-start animate-pulse">
-                    <div className="bg-slate-700/50 p-3 rounded-xl text-xs text-blue-300 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                      Buscando en la base de datos de Tabasco...
-                    </div>
-                  </div>
-                )}
-              <div ref={scrollRef} />
-            </div>
-            <div className="p-3 border-t border-slate-700 bg-slate-800 flex gap-2">
-              <input 
-                value={input} onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none"
-                placeholder="Escribe tu duda..."
-              />
-              <button onClick={handleSendMessage} className="bg-blue-600 p-2 rounded-lg hover:bg-blue-500 transition">
-                <Send size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-        
-        <button 
-          onClick={() => setIsChatOpen(!isChatOpen)}
-          className="p-4 bg-blue-600 rounded-full shadow-lg hover:bg-blue-500 transition-all hover:scale-110 active:scale-95"
-        >
-          {isChatOpen ? <X size={24} /> : <MessageCircle size={24} />}
-        </button>
-      </div>
+      <span className="font-semibold text-lg tracking-wide text-blue-300">
+        HydroFlow Precision
+      </span>
     </div>
-  );
+
+  </div>
+</header>
+
+
+{/* DASHBOARD */}
+<div className="
+flex-1
+grid
+grid-cols-1
+lg:grid-cols-[280px_1fr_280px]
+xl:grid-cols-[320px_1fr_320px]
+gap-6
+p-4
+lg:p-6
+max-w-[1800px]
+mx-auto
+w-full
+min-h-0
+">
+
+{/* CHAT PANEL */}
+<div className="
+hidden
+lg:flex
+flex-col
+bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden
+">
+
+  <div className="p-4 border-b border-slate-800 flex items-center gap-2">
+    <Bot size={18}/>
+    <span className="font-semibold text-sm">Asistente IA</span>
+  </div>
+
+  <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-minimal">
+    {messages.map((m,i)=>(
+      <div
+        key={i}
+        className={`flex ${m.role==="user" ? "justify-end" : "justify-start"}`}
+      >
+        <div
+          className={`p-3 rounded-xl text-sm max-w-[85%] break-words ${
+            m.role==="user" ? "bg-blue-600" : "bg-slate-800"
+          }`}
+        >
+          <div className="markdown-content">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {m.content}
+            </ReactMarkdown>
+          </div>
+        </div>
+      </div>
+    ))}
+
+    {isSearching && (
+      <div className="flex justify-start animate-pulse">
+        <div className="bg-slate-700/50 p-3 rounded-xl text-xs text-blue-300 flex items-center gap-2">
+          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+          Buscando en la base de datos de Tabasco...
+        </div>
+      </div>
+    )}
+
+    <div ref={scrollRef}/>
+  </div>
+
+  <div className="p-3 border-t border-slate-800 flex gap-2">
+    <input
+      value={input}
+      onChange={(e)=>setInput(e.target.value)}
+      onKeyDown={(e)=>e.key==="Enter" && handleSendMessage()}
+      className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none"
+      placeholder="Pregunta sobre clima o siembra..."
+    />
+    <button
+      onClick={handleSendMessage}
+      className="bg-blue-600 p-2 rounded-lg hover:bg-blue-500 transition"
+    >
+      <Send size={16}/>
+    </button>
+  </div>
+
+</div>
+<button
+onClick={()=>setIsChatOpen(true)}
+className="z-50 lg:hidden fixed bottom-6 right-6 bg-blue-600 p-4 rounded-full shadow-xl"
+>
+<MessageCircle size={20}/>
+</button>
+{isChatOpen && (
+<div className="fixed inset-0 bg-black/60 backdrop-blur z-50 flex lg:hidden">
+
+<div className="w-full bg-slate-900 h-full flex flex-col">
+
+<div className="p-4 border-b border-slate-800 flex justify-between items-center">
+<span className="font-semibold">Asistente IA</span>
+
+<button onClick={()=>setIsChatOpen(false)}>
+<X/>
+</button>
+</div>
+
+<div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+{messages.map((m,i)=>(
+<div
+key={i}
+className={`flex ${m.role==="user" ? "justify-end" : "justify-start"}`}
+>
+<div
+className={`p-3 rounded-xl text-sm max-w-[85%] break-words ${
+m.role==="user" ? "bg-blue-600" : "bg-slate-800"
+}`}
+>
+<ReactMarkdown remarkPlugins={[remarkGfm]}>
+{m.content}
+</ReactMarkdown>
+</div>
+</div>
+))}
+
+{isSearching && (
+<div className="flex justify-start animate-pulse">
+<div className="bg-slate-700/50 p-3 rounded-xl text-xs text-blue-300">
+Buscando en la base de datos...
+</div>
+</div>
+)}
+
+</div>
+
+<div className="p-3 border-t border-slate-800 flex gap-2">
+
+<input
+value={input}
+onChange={(e)=>setInput(e.target.value)}
+onKeyDown={(e)=>e.key==="Enter" && handleSendMessage()}
+className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm"
+placeholder="Pregunta..."
+/>
+
+<button
+onClick={handleSendMessage}
+className="bg-blue-600 p-2 rounded-lg"
+>
+<Send size={16}/>
+</button>
+
+</div>
+
+</div>
+</div>
+)}
+
+
+{/* MAPA + GRÁFICA */}
+<div className="
+order-1
+lg:order-2
+flex flex-col gap-6 min-w-0 min-h-0
+">
+
+  <div className="h-[55vh] lg:flex-[1.5] lg:h-auto bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+    {loading
+      ? <div className="p-6">Cargando mapa...</div>
+      : <MapaET
+          data={data}
+          onPointClick={handlePointClick}
+          selectedCoords={selectedPoint ? { LAT:selectedPoint.LAT, LON:selectedPoint.LON } : null}
+        />
+    }
+  </div>
+
+  <div className="h-[35vh] lg:flex-[1] lg:h-auto min-w-0 bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+    <GraficaMensual series={seriesForPlot}/>
+  </div>
+
+</div>
+
+
+{/* PANEL DATOS */}
+<div className="
+order-2
+lg:order-3
+bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden
+">
+
+{selectedPoint ? (
+  <PanelDatos
+    selectedPoint={selectedPoint}
+    selectedYear={selectedYear}
+    selectedMonth={selectedMonth}
+    onChangeDate={handleChangeDate}
+  />
+) : (
+  <div className="p-6 text-gray-400">
+    Selecciona un punto del mapa.
+  </div>
+)}
+
+</div>
+
+</div>
+
+</div>
+);
 }

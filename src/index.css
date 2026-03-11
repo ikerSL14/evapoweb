@@ -9,28 +9,29 @@ body {
   @apply bg-slate-900 text-gray-200;
 }
 
+
 .leaflet-container {
   border-radius: 12px;
 }
 
-/* Scrollbar minimal */
-.scroll-minimal::-webkit-scrollbar {
-  height: 6px;
+/* scrollbar minimal */
+.scroll-minimal::-webkit-scrollbar{
+height:6px;
+width:6px;
+}
+
+.scroll-minimal::-webkit-scrollbar-thumb {
+  background: #1e2849;
+  border-radius: 20px;
+}
+
+.scroll-minimal::-webkit-scrollbar-thumb:hover {
+  background: #052149;
 }
 
 .scroll-minimal::-webkit-scrollbar-track {
   background: transparent;
 }
-
-.scroll-minimal::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
-  border-radius: 999px;
-}
-
-.scroll-minimal::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.7);
-}
-
 .recharts-tooltip-label {
   color: #1e293b; /* text-slate-800 */
   font-weight: bold;
@@ -73,7 +74,7 @@ body {
 }
 
 .markdown-content table {
-  @apply min-w-[500px] mb-4 border-collapse bg-slate-800/50 rounded-lg;
+  @apply min-w-[420px] mb-4 border-collapse bg-slate-800/50 rounded-lg;
   /* El min-w asegura que no se apriete demasiado el texto */
 }
 

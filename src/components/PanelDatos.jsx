@@ -46,7 +46,7 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
   }, [series, selectedYear]);
 
   return (
-    <div className="p-4 bg-slate-800/60 rounded-2xl shadow space-y-4">
+    <div className="p-5 space-y-5 lg:h-full lg:overflow-y-auto scroll-minimal">
 
       {/* SELECTORES */}
       <div className="grid grid-cols-2 gap-3">
@@ -127,14 +127,16 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
           unidad="kPa"
         />
 
-        <div className="col-span-2 bg-slate-900/60 p-3 rounded flex gap-3 items-center mb-7">
+        <div className="col-span-2 bg-slate-900/60 p-3 rounded flex gap-3 items-center mb-2">
           <Activity className="w-6 h-6 text-emerald-400" />
           <div>
             <div className="text-gray-400 text-sm">
               Evapotranspiración calculada
             </div>
             <div className="text-white font-semibold text-2xl">
-              {selectedPoint.ET_CALCULADA ?? "N/A"} mm/día
+              {selectedPoint.ET_CALCULADA
+                ? Number(selectedPoint.ET_CALCULADA).toFixed(5)
+                : "N/A"} mm/día
             </div>
           </div>
         </div>
@@ -145,10 +147,17 @@ export default function PanelDatos({ selectedPoint, selectedYear, selectedMonth,
 
 function Dato({ icon: Icon, label, valor, unidad }) {
   return (
-    <div className="bg-slate-900/60 p-3 rounded flex gap-3 items-center">
+    <div className="bg-slate-900/60 p-3 rounded flex gap-3 items-center min-w-0">
       {Icon && <Icon className="w-5 h-5 text-blue-400 shrink-0" />}
-      <div>
-        <div className="text-gray-400 text-xs">{label}</div>
+
+      <div className="min-w-0">
+        <div
+          className="text-gray-400 text-xs truncate cursor-help"
+          title={label}
+        >
+          {label}
+        </div>
+
         <div className="text-white font-medium">
           {valor ?? "N/A"} {unidad}
         </div>

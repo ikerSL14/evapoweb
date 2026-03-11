@@ -12,16 +12,17 @@ export default function GraficaMensual({ series }) {
   const chartWidth = Math.max(series.length * 20, 800);
 
   return (
-    <div className="w-full h-full p-4 bg-slate-800/60 rounded-2xl shadow">
+    <div className="w-full h-full p-4 flex flex-col bg-gradient-to-b from-slate-900/80 to-slate-900/40 rounded-2xl">
       <h3 className="text-lg font-semibold mb-2">
         Serie de Evapotranspiración
       </h3>
 
       {/* CONTENEDOR SCROLLEABLE */}
-      <div className="w-full h-[85%] overflow-x-auto overflow-y-hidden scroll-minimal">
+      <div className="w-full h-full overflow-x-auto overflow-y-hidden scroll-minimal">
+  <div style={{ width: chartWidth }}>
         <LineChart
           width={chartWidth}
-          height={180}
+          height={window.innerWidth < 640 ? 100 : 120}
           data={series}
           margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
         >
@@ -40,12 +41,13 @@ export default function GraficaMensual({ series }) {
           <Line
             type="monotone"
             dataKey="ET"
-            stroke="#60a5fa"
-            strokeWidth={2}
+            stroke="#38bdf8"
+            strokeWidth={2.5}
             dot={false}          // 🔥 CLAVE para performance
             isAnimationActive={false} // 🔥 MUY IMPORTANTE
           />
         </LineChart>
+        </div>
       </div>
     </div>
   );

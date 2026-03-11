@@ -5,6 +5,17 @@ import L from "leaflet";
 import "leaflet.heat";
 import { useMap } from "react-leaflet";
 
+function FixMapResize() {
+  const map = useMap();
+
+  useEffect(() => {
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+  }, [map]);
+
+  return null;
+}
 
 // Componente para animar el vuelo al punto seleccionado
 /* function FlyToPoint({ center }) {
@@ -29,7 +40,7 @@ function HeatLayer({ puntos }) {
     ]);
 
     const heat = L.heatLayer(heatData, {
-      radius: 25,
+      radius: window.innerWidth < 640 ? 15 : 25,
       blur: 15,
       maxZoom: 10
     }).addTo(map);
@@ -67,15 +78,29 @@ export default function MapaET({ data, onPointClick, selectedCoords }) {
   }, [puntos])
 
   const getRepresentativeET = (items) => {
-    if (!items || items.length === 0) return 0
-    const et = items.map(i => i.ET_CALCULADA).find(v => v != null)
-    return et ?? 0
-  }
+    if (!items || items.length === 0) return null;
+
+    const latest = items
+      .filter(i => i.ET_CALCULADA != null)
+      .sort((a, b) => {
+        if (a.YEAR !== b.YEAR) return b.YEAR - a.YEAR;
+        return a.Month - b.Month;
+      })[0];
+
+    return latest?.ET_CALCULADA ?? null;
+  };
 
 
   return (
-    <div className="w-full h-full rounded-2xl shadow overflow-hidden">
-      <MapContainer center={centro} zoom={9} style={{ height: '100%', width: '100%' }}>
+    <div className="relative z-0 w-full h-full rounded-2xl shadow-inner overflow-hidden border border-slate-800">
+      <MapContainer
+        center={centro}
+        zoom={9}
+        doubleClickZoom={false}
+        tap={true}
+        style={{ height: "100%", width: "100%" }}
+        >
+        <FixMapResize />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -91,10 +116,13 @@ export default function MapaET({ data, onPointClick, selectedCoords }) {
             <CircleMarker
               key={i}
               center={[p.LAT, p.LON]}
-              radius={8}
+              radius={window.innerWidth < 640 ? 14 : 8}
               opacity={0}
               fillOpacity={0}
-              eventHandlers={{ click: () => onPointClick(p) }}
+              eventHandlers={{
+                click: () => onPointClick(p),
+                touchstart: () => onPointClick(p)
+              }}
             >
               <Tooltip direction="top" offset={[0, -8]} opacity={0.9}>
                 <div className="text-sm">
