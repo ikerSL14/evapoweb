@@ -226,7 +226,7 @@ const handleSendMessage = async () => {
   }, [selectedPoint]);
 
   return (
-<div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+<div className="min-h-screen lg:h-screen bg-slate-950 text-slate-100 flex flex-col lg:overflow-hidden">
 
 {/* NAVBAR */}
 <header className="h-16 border-b border-slate-800 bg-slate-900/70 backdrop-blur sticky top-0 z-50">
@@ -260,6 +260,7 @@ max-w-[1800px]
 mx-auto
 w-full
 min-h-0
+overflow-visible lg:overflow-hidden
 ">
 
 {/* CHAT PANEL */}
@@ -355,9 +356,11 @@ className={`p-3 rounded-xl text-sm max-w-[85%] break-words ${
 m.role==="user" ? "bg-blue-600" : "bg-slate-800"
 }`}
 >
-<ReactMarkdown remarkPlugins={[remarkGfm]}>
-{m.content}
-</ReactMarkdown>
+<div className="markdown-content">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {m.content}
+            </ReactMarkdown>
+          </div>
 </div>
 </div>
 ))}
