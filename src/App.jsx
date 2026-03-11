@@ -54,9 +54,11 @@ const handleSendMessage = async () => {
 
   try {
     // LLAMADA ÚNICA A LA WORKER (Ella vectoriza y prepara el chat)
-    const resWorker = await fetch("https://shrill-shape-31e8.ikersalazarliev.workers.dev", {
+    const resWorker = await fetch(
+    "https://hydroflowp.netlify.app/.netlify/functions/chat",
+    {
       method: "POST",
-      body: JSON.stringify({ prompt: input, contextoTexto: "" }) // Primero pedimos embedding
+      body: JSON.stringify({ prompt: input, contextoTexto: "" })
     });
     
     const { embedding } = await resWorker.json();
@@ -149,12 +151,14 @@ const handleSendMessage = async () => {
     // 4. Validación de seguridad: ¿Qué pasa si después de filtrar no queda nada?
     if (!contextoTexto || contextoTexto.trim() === "") {
         // Si no hay datos reales, le avisamos a la Worker de forma explícita
-        const resFinal = await fetch("https://shrill-shape-31e8.ikersalazarliev.workers.dev", {
-            method: "POST",
-            body: JSON.stringify({ 
-                prompt: input, 
-                contextoTexto: "SISTEMA: No se encontraron registros válidos (mayores a 0) para este periodo en la base de datos." 
-            })
+        const resFinal = await fetch(
+        "https://hydroflowp.netlify.app/.netlify/functions/chat",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            prompt: input,
+            contextoTexto: "SISTEMA: No se encontraron registros válidos (mayores a 0) para este periodo en la base de datos."
+          })
         });
         const { respuesta } = await resFinal.json();
         setMessages(prev => [...prev, { role: 'bot', content: respuesta }]);
@@ -162,9 +166,11 @@ const handleSendMessage = async () => {
     }
 
     // 5. Llamada final normal (si hay contexto válido)
-    const resFinal = await fetch("https://shrill-shape-31e8.ikersalazarliev.workers.dev", {
-        method: "POST",
-        body: JSON.stringify({ prompt: input, contextoTexto })
+    const resFinal = await fetch(
+    "https://hydroflowp.netlify.app/.netlify/functions/chat",
+    {
+      method: "POST",
+      body: JSON.stringify({ prompt: input, contextoTexto })
     });
 
     const { respuesta } = await resFinal.json();
